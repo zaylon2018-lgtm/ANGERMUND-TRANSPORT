@@ -1,0 +1,1 @@
+exports.handler=async(event)=>{const q=event.queryStringParameters||{};const html=`<html><body><h1>ANGERMUND TRANSPORT</h1><h2>Invoice ${q.invoice||''}</h2><p>Client: ${q.client||''}</p><p>Amount: ${q.amount||''}</p><script>window.print()</script></body></html>`;return {statusCode:200,headers:{'Content-Type':'text/html'},body:html}}
