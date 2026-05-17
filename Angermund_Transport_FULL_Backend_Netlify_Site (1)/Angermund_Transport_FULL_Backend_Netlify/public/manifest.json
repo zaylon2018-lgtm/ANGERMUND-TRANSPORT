@@ -1,0 +1,8 @@
+{
+  "name": "Angermund Transport ERP",
+  "short_name": "Angermund ERP",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#07101d",
+  "theme_color": "#07101d"
+}

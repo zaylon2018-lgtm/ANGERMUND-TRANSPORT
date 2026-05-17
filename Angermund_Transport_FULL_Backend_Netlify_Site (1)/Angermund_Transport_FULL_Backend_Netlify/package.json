@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Static app ready'",
+    "start": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^9.1.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.38.1"
+  }
+}

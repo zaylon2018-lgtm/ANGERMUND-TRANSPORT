@@ -1,0 +1,8 @@
+const { getStore } = require('@netlify/blobs');
+const crypto = require('crypto');
+const SECRET = process.env.JWT_SECRET || 'change-this-secret-in-netlify-env';
+function sign(payload){const data=Buffer.from(JSON.stringify(payload)).toString('base64url');const sig=crypto.createHmac('sha256',SECRET).update(data).digest('base64url');return data+'.'+sig}
+function verify(token){const [data,sig]=String(token||'').split('.');if(!data||!sig)return null;const good=crypto.createHmac('sha256',SECRET).update(data).digest('base64url');if(sig!==good)return null;return JSON.parse(Buffer.from(data,'base64url').toString())}
+async function getUsers(store){let users=await store.get('users',{type:'json'});if(!users){users=[{username:'admin',password:'admin123',name:'Admin',role:'admin',status:'Active'},{username:'driver1',password:'driver123',name:'Driver 1',role:'driver',status:'Active'}];await store.setJSON('users',users)}return users}
+exports.handler=async(event)=>{try{const store=getStore('angermund-erp');const body=event.body?JSON.parse(event.body):{};if(event.httpMethod==='POST'&&body.action==='login'){const users=await getUsers(store);const u=users.find(x=>x.username===body.username&&x.password===body.password&&x.status!=='Disabled');if(!u)return {statusCode:401,body:JSON.stringify({error:'Wrong login'})};const safe={username:u.username,name:u.name,role:u.role,status:u.status};return {statusCode:200,body:JSON.stringify({token:sign({...safe,iat:Date.now()}),user:safe})}}return {statusCode:400,body:JSON.stringify({error:'Bad request'})}}catch(e){return {statusCode:500,body:JSON.stringify({error:e.message})}}}
+exports.verify=verify;
