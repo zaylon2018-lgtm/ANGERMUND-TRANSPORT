@@ -5,77 +5,189 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Angermund Transport ERP</title>
 <style>
-body{margin:0;font-family:Arial;background:#08111d;color:#fff;background-image:linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)),url('truck-bg.jpg');background-size:cover}
-.login{max-width:400px;margin:80px auto;background:#111;padding:25px;border-radius:15px}
-input,button{width:100%;padding:12px;margin-top:10px;border-radius:8px;border:0}
-button{background:#1877f2;color:#fff;font-weight:bold}
+body{margin:0;font-family:Arial;background:#08111d;color:#fff;background-image:linear-gradient(rgba(0,0,0,.76),rgba(0,0,0,.76)),url('truck-bg.jpg');background-size:cover;background-position:center;min-height:100vh}
+.login{max-width:420px;margin:80px auto;background:#111;padding:25px;border-radius:15px;box-shadow:0 15px 50px #000}
+input,button{width:100%;padding:12px;margin-top:10px;border-radius:8px;border:0;box-sizing:border-box}
+button{background:#1877f2;color:#fff;font-weight:bold;cursor:pointer}
+button.secondary{background:#333}
 .dashboard{display:none;padding:20px}
-.card{background:rgba(20,20,20,.8);padding:20px;border-radius:14px;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.card{background:rgba(20,20,20,.82);padding:20px;border-radius:14px;margin-bottom:15px}
+table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #333;text-align:left}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.login{margin:40px 15px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="login" id="login">
-<h1>ANGERMUND TRANSPORT</h1>
+<h1>ANGERMUND<br>TRANSPORT</h1>
 <p>Supabase ERP Login</p>
-<input id="url" placeholder="Supabase URL">
-<input id="key" placeholder="Supabase Anon Key">
+
+<input id="url" placeholder="Supabase Project URL only: https://xxxxx.supabase.co">
+<input id="key" placeholder="Supabase publishable / anon key">
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
+
 <button onclick="login()">Login</button>
+<button class="secondary" onclick="saveSettings()">Save URL + Key</button>
+<p id="msg"></p>
+
+<small>
+Use Project URL only. Do NOT use /rest/v1/.<br>
+Example: https://xxxxx.supabase.co
+</small>
 </div>
 
 <div class="dashboard" id="dashboard">
-<h1>Transport ERP Dashboard</h1>
+<h1>Angermund Transport ERP</h1>
+<p id="welcome"></p>
+
+<div class="grid">
+<div class="card"><h3>Total Revenue</h3><h1 id="revenue">N$ 0</h1></div>
+<div class="card"><h3>Total Expenses</h3><h1 id="expenses">N$ 0</h1></div>
+<div class="card"><h3>Net Profit</h3><h1 id="profit">N$ 0</h1></div>
+<div class="card"><h3>Total KM</h3><h1 id="km">0</h1></div>
+</div>
+
+<div class="card">
+<h2>Quick Trip Entry</h2>
+<input id="route" placeholder="Route e.g. Windhoek to Cape Town">
+<input id="driver" placeholder="Driver">
+<input id="truck" placeholder="Truck">
+<input id="tripKm" type="number" placeholder="KM">
+<input id="rate" type="number" placeholder="Rate per KM">
+<input id="cost" type="number" placeholder="Total Costs">
+<button onclick="addTrip()">Save Trip to Supabase</button>
+</div>
+
 <div class="card">
 <h2>Trips</h2>
-<p>Track all SA trips, KM, fuel, permits and profit.</p>
+<table id="tripsTable"></table>
 </div>
-<div class="card">
-<h2>Fleet</h2>
-<p>Editable truck and trailer management.</p>
-</div>
-<div class="card">
-<h2>GPS & WhatsApp</h2>
-<p>Ready for future integration.</p>
-</div>
+
 <button onclick="logout()">Logout</button>
 </div>
 
 <script>
-let supabase;
+let sbClient = null;
+let trips = [];
+
+function cleanUrl(u){
+  return (u || '').trim().replace('/rest/v1/','').replace('/rest/v1','').replace(/\/$/,'');
+}
+
+function money(n){
+  return 'N$ ' + Number(n||0).toLocaleString('en-NA',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function message(t){
+  document.getElementById('msg').innerText = t;
+}
+
+function saveSettings(){
+  localStorage.setItem('sb_url', cleanUrl(document.getElementById('url').value));
+  localStorage.setItem('sb_key', document.getElementById('key').value.trim());
+  message('Saved. Now enter email/password and click Login.');
+}
 
 async function login(){
-  const url=document.getElementById('url').value;
-  const key=document.getElementById('key').value;
-  const email=document.getElementById('email').value;
-  const password=document.getElementById('password').value;
+  try{
+    const url = cleanUrl(document.getElementById('url').value);
+    const key = document.getElementById('key').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
 
-  localStorage.setItem('sb_url',url);
-  localStorage.setItem('sb_key',key);
+    if(!url || !key || !email || !password){
+      message('Fill in URL, key, email and password.');
+      return;
+    }
 
-  supabase = window.supabase.createClient(url,key);
+    localStorage.setItem('sb_url', url);
+    localStorage.setItem('sb_key', key);
 
-  const {data,error}=await supabase.auth.signInWithPassword({
-    email,password
-  });
+    sbClient = window.supabase.createClient(url, key);
 
-  if(error){alert(error.message);return;}
+    const result = await sbClient.auth.signInWithPassword({ email, password });
+    if(result.error){
+      message(result.error.message);
+      return;
+    }
 
-  document.getElementById('login').style.display='none';
-  document.getElementById('dashboard').style.display='block';
+    document.getElementById('login').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    document.getElementById('welcome').innerText = 'Logged in as ' + email;
+
+    await loadTrips();
+  }catch(e){
+    message('Error: ' + e.message);
+  }
 }
 
-function logout(){
- localStorage.clear();
- location.reload();
+async function addTrip(){
+  const km = Number(document.getElementById('tripKm').value || 0);
+  const rate = Number(document.getElementById('rate').value || 0);
+  const cost = Number(document.getElementById('cost').value || 0);
+  const income = km * rate;
+  const profit = income - cost;
+
+  const row = {
+    route: document.getElementById('route').value,
+    driver: document.getElementById('driver').value,
+    truck: document.getElementById('truck').value,
+    km: km, rate: rate, cost: cost, income: income, profit: profit
+  };
+
+  const result = await sbClient.from('trips').insert(row);
+  if(result.error){ alert(result.error.message); return; }
+
+  document.getElementById('route').value='';
+  document.getElementById('driver').value='';
+  document.getElementById('truck').value='';
+  document.getElementById('tripKm').value='';
+  document.getElementById('rate').value='';
+  document.getElementById('cost').value='';
+
+  await loadTrips();
 }
 
-window.onload=()=>{
- const url=localStorage.getItem('sb_url');
- const key=localStorage.getItem('sb_key');
- if(url) document.getElementById('url').value=url;
- if(key) document.getElementById('key').value=key;
+async function loadTrips(){
+  const result = await sbClient.from('trips').select('*').order('created_at',{ascending:false});
+  if(result.error){
+    message('Login OK. Create the trips table in Supabase SQL Editor. Error: ' + result.error.message);
+    trips = [];
+    render();
+    return;
+  }
+  trips = result.data || [];
+  render();
+}
+
+function render(){
+  const revenue = trips.reduce((a,t)=>a+Number(t.income||0),0);
+  const expenses = trips.reduce((a,t)=>a+Number(t.cost||0),0);
+  const profit = revenue - expenses;
+  const km = trips.reduce((a,t)=>a+Number(t.km||0),0);
+
+  document.getElementById('revenue').innerText = money(revenue);
+  document.getElementById('expenses').innerText = money(expenses);
+  document.getElementById('profit').innerText = money(profit);
+  document.getElementById('km').innerText = km.toLocaleString();
+
+  document.getElementById('tripsTable').innerHTML =
+    '<tr><th>Route</th><th>Driver</th><th>Truck</th><th>KM</th><th>Rate/KM</th><th>Income</th><th>Cost</th><th>Profit</th></tr>' +
+    trips.map(t=>'<tr><td>'+(t.route||'')+'</td><td>'+(t.driver||'')+'</td><td>'+(t.truck||'')+'</td><td>'+(t.km||0)+'</td><td>'+money(t.rate||0)+'</td><td>'+money(t.income||0)+'</td><td>'+money(t.cost||0)+'</td><td style="color:'+(Number(t.profit||0)>=0?'#49ff66':'#ff5555')+'">'+money(t.profit||0)+'</td></tr>').join('');
+}
+
+async function logout(){
+  if(sbClient) await sbClient.auth.signOut();
+  location.reload();
+}
+
+window.onload = function(){
+  const url = localStorage.getItem('sb_url');
+  const key = localStorage.getItem('sb_key');
+  if(url) document.getElementById('url').value = url;
+  if(key) document.getElementById('key').value = key;
 }
 </script>
 </body>
