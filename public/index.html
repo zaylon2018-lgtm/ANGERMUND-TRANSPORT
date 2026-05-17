@@ -1,194 +1,290 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Angermund Transport ERP</title>
+<link rel="manifest" href="manifest.json">
 <style>
-body{margin:0;font-family:Arial;background:#08111d;color:#fff;background-image:linear-gradient(rgba(0,0,0,.76),rgba(0,0,0,.76)),url('truck-bg.jpg');background-size:cover;background-position:center;min-height:100vh}
-.login{max-width:420px;margin:80px auto;background:#111;padding:25px;border-radius:15px;box-shadow:0 15px 50px #000}
-input,button{width:100%;padding:12px;margin-top:10px;border-radius:8px;border:0;box-sizing:border-box}
-button{background:#1877f2;color:#fff;font-weight:bold;cursor:pointer}
-button.secondary{background:#333}
-.dashboard{display:none;padding:20px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
-.card{background:rgba(20,20,20,.82);padding:20px;border-radius:14px;margin-bottom:15px}
-table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #333;text-align:left}
-@media(max-width:900px){.grid{grid-template-columns:1fr}.login{margin:40px 15px}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#08111d;color:#fff;background-image:linear-gradient(90deg,rgba(0,0,0,.88),rgba(0,0,0,.55)),url('truck-bg.jpg');background-size:cover;background-position:center;background-attachment:fixed;min-height:100vh}
+.hidden{display:none!important}
+.login{max-width:430px;margin:70px auto;background:rgba(12,12,12,.92);padding:28px;border-radius:16px;box-shadow:0 20px 70px #000;border:1px solid rgba(255,255,255,.12)}
+.login h1{font-size:32px;margin:0 0 10px}.login span{color:#2d8cff}
+input,select,textarea,button{font-family:inherit}
+.login input,.login button{width:100%;padding:13px;margin-top:10px;border-radius:8px;border:0}
+.login button,.btn{background:#1877f2;color:#fff;font-weight:bold;cursor:pointer;border:0;border-radius:9px;padding:10px 14px}
+.btn.gray,.login button.gray{background:#333}.btn.red{background:#c93030}.btn.green{background:#179c50}.btn.orange{background:#e07900}
+#app{display:flex;min-height:100vh}
+aside{width:255px;background:linear-gradient(180deg,rgba(7,16,28,.98),rgba(7,16,28,.94));position:fixed;left:0;top:0;bottom:0;padding:16px 12px;border-right:1px solid rgba(255,255,255,.12);overflow:auto;z-index:10}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}.brand .ico{font-size:38px}.brand h1{font-size:23px;margin:0;line-height:1}.brand h2{font-size:23px;color:#2d8cff;margin:0;line-height:1}
+.nav{display:block;width:100%;text-align:left;background:transparent;color:#fff;border:0;padding:11px 12px;margin:3px 0;border-radius:10px;font-size:14px;cursor:pointer}.nav.active,.nav:hover{background:#1768d8}
+.adminBox{border-top:1px solid rgba(255,255,255,.14);margin-top:15px;padding-top:12px}.adminBox small{color:#55e35b}
+main{margin-left:255px;padding:16px 20px;width:calc(100% - 255px)}
+.topbar{display:flex;justify-content:flex-end;gap:12px;align-items:center;margin-bottom:16px}.topbar button:first-child{margin-right:auto}
+.page{display:none}.page.active{display:block}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:15px}
+.card{background:rgba(16,16,16,.78);border:1px solid rgba(255,255,255,.12);border-radius:13px;padding:16px;box-shadow:0 14px 30px #0008;backdrop-filter:blur(5px);margin-bottom:14px}
+.metric{min-height:120px}.metric small{color:#b8c3d7}.metric h2{font-size:27px;margin:16px 0 0}
+.grid2{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.head{display:flex;align-items:center;justify-content:space-between;margin:10px 0 14px}.head h2{font-size:31px;margin:0}
+.formGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.formGrid input,.formGrid select,.formGrid textarea{width:100%;padding:11px;border-radius:8px;border:1px solid #ffffff22;background:#fff;color:#111}
+.tableWrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left;white-space:nowrap}th{background:rgba(0,0,0,.25)}
+.profit{color:#45ff68;font-weight:bold}.loss{color:#ff4d4d;font-weight:bold}.pill{padding:4px 8px;border-radius:999px;background:#1e7b31}.pill.orange{background:#b76608}.pill.red{background:#ac2b2b}.pill.blue{background:#1768d8}
+.modal{display:none;position:fixed;inset:0;background:#000b;align-items:center;justify-content:center;z-index:100}.modal.show{display:flex}.modalBox{width:min(850px,94vw);max-height:90vh;overflow:auto;background:#101826;border:1px solid #ffffff22;border-radius:16px;padding:20px}.close{float:right;background:transparent;border:0;color:white;font-size:28px}
+.mobileTop{display:none}
+textarea{min-height:130px}.note{font-size:12px;color:#b8c3d7}.blueLink{color:#5aa7ff}
+@media(max-width:1000px){.mobileTop{display:flex;gap:10px;align-items:center;padding:12px;background:#07101d;position:sticky;top:0;z-index:12}.mobileTop button{background:#1768d8;color:white;border:0;border-radius:8px;padding:9px 12px}aside{transform:translateX(-105%);transition:.25s}.open{transform:translateX(0)}main{margin-left:0;width:100%;padding:12px}.topbar{display:none}.metrics,.grid2,.grid3,.grid4,.formGrid{grid-template-columns:1fr}.login{margin:35px 15px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<div class="login" id="login">
-<h1>ANGERMUND<br>TRANSPORT</h1>
-<p>Supabase ERP Login</p>
 
-<input id="url" placeholder="Supabase Project URL only: https://xxxxx.supabase.co">
-<input id="key" placeholder="Supabase publishable / anon key">
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-
-<button onclick="login()">Login</button>
-<button class="secondary" onclick="saveSettings()">Save URL + Key</button>
-<p id="msg"></p>
-
-<small>
-Use Project URL only. Do NOT use /rest/v1/.<br>
-Example: https://xxxxx.supabase.co
-</small>
+<div class="login" id="loginScreen">
+  <h1>ANGERMUND<br><span>TRANSPORT</span></h1>
+  <p>Full Supabase ERP Login</p>
+  <input id="sbUrl" placeholder="Supabase Project URL: https://xxxxx.supabase.co">
+  <input id="sbKey" placeholder="Supabase publishable / anon key">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <button class="gray" onclick="saveSettings()">Save URL + Key</button>
+  <p id="loginMsg"></p>
+  <small>Use Project URL only. Do not use /rest/v1/.</small>
 </div>
 
-<div class="dashboard" id="dashboard">
-<h1>Angermund Transport ERP</h1>
-<p id="welcome"></p>
+<div id="app" class="hidden">
+  <div class="mobileTop"><button onclick="toggleMenu()">☰</button><b>ANGERMUND ERP</b><button onclick="logout()">Logout</button></div>
+  <aside id="sidebar">
+    <div class="brand"><div class="ico">🚛</div><div><h1>ANGERMUND</h1><h2>TRANSPORT</h2></div></div>
+    <button class="nav active" onclick="showPage('dashboard',this)">🏠 Dashboard</button>
+    <button class="nav" onclick="showPage('trips',this)">🚚 Trips</button>
+    <button class="nav" onclick="showPage('fleet',this)">🚛 Fleet Manager</button>
+    <button class="nav" onclick="showPage('drivers',this)">👤 Drivers</button>
+    <button class="nav" onclick="showPage('diesel',this)">⛽ Diesel</button>
+    <button class="nav" onclick="showPage('permits',this)">🛡️ SA Permits</button>
+    <button class="nav" onclick="showPage('payroll',this)">👥 Payroll</button>
+    <button class="nav" onclick="showPage('workers',this)">👷 Site Workers</button>
+    <button class="nav" onclick="showPage('maintenance',this)">🔧 Maintenance</button>
+    <button class="nav" onclick="showPage('tyres',this)">⚙️ Tyres</button>
+    <button class="nav" onclick="showPage('workshop',this)">🏭 Workshop Jobs</button>
+    <button class="nav" onclick="showPage('fines',this)">⚠️ Fines/Damages</button>
+    <button class="nav" onclick="showPage('border',this)">🇿🇦 Border Logs</button>
+    <button class="nav" onclick="showPage('gps',this)">📍 GPS Tracking</button>
+    <button class="nav" onclick="showPage('invoices',this)">📄 Invoice PDFs</button>
+    <button class="nav" onclick="showPage('whatsapp',this)">💬 WhatsApp Reports</button>
+    <button class="nav" onclick="showPage('users',this)">🔐 Admin Users</button>
+    <button class="nav" onclick="showPage('settings',this)">⚙️ Settings</button>
+    <div class="adminBox"><b id="loggedEmail"></b><br><small>● Supabase Online</small><br><button class="btn gray" onclick="logout()">Logout</button></div>
+  </aside>
 
-<div class="grid">
-<div class="card"><h3>Total Revenue</h3><h1 id="revenue">N$ 0</h1></div>
-<div class="card"><h3>Total Expenses</h3><h1 id="expenses">N$ 0</h1></div>
-<div class="card"><h3>Net Profit</h3><h1 id="profit">N$ 0</h1></div>
-<div class="card"><h3>Total KM</h3><h1 id="km">0</h1></div>
+  <main>
+    <header class="topbar">
+      <button class="btn gray" onclick="toggleMenu()">☰</button>
+      <button class="btn" onclick="loadAll()">Refresh Cloud</button>
+      <button class="btn green" onclick="captureGPS()">Send GPS</button>
+      <button class="btn gray" onclick="logout()">Logout</button>
+    </header>
+
+    <section id="dashboard" class="page active">
+      <div class="metrics">
+        <div class="card metric"><small>TOTAL REVENUE</small><h2 id="mRevenue">N$ 0</h2></div>
+        <div class="card metric"><small>TOTAL EXPENSES</small><h2 id="mExpenses">N$ 0</h2></div>
+        <div class="card metric"><small>NET PROFIT</small><h2 id="mProfit">N$ 0</h2></div>
+        <div class="card metric"><small>TOTAL KM</small><h2 id="mKm">0</h2></div>
+        <div class="card metric"><small>DIESEL COST</small><h2 id="mDiesel">N$ 0</h2></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>Recent Trips</h2><div class="tableWrap"><table id="recentTrips"></table></div></div>
+        <div class="card"><h2>Alerts</h2><div id="alerts"></div></div>
+      </div>
+      <div class="grid3">
+        <div class="card"><h3>Profit by Driver</h3><div id="profitDriver"></div></div>
+        <div class="card"><h3>Profit by Truck</h3><div id="profitTruck"></div></div>
+        <div class="card"><h3>Profit by Route</h3><div id="profitRoute"></div></div>
+      </div>
+    </section>
+
+    <section id="trips" class="page">
+      <div class="head"><h2>Trips</h2><button class="btn" onclick="openModal('trip')">+ Add Trip</button></div>
+      <div class="card"><div class="tableWrap"><table id="tripsTable"></table></div></div>
+    </section>
+
+    <section id="fleet" class="page">
+      <div class="head"><h2>Fleet Manager</h2><button class="btn" onclick="openModal('fleet')">+ Add Truck</button></div>
+      <div class="card"><div class="tableWrap"><table id="fleetTable"></table></div></div>
+    </section>
+
+    <section id="drivers" class="page"><div class="head"><h2>Drivers</h2><button class="btn" onclick="openModal('driver')">+ Add Driver</button></div><div class="card"><div class="tableWrap"><table id="driversTable"></table></div></div></section>
+    <section id="diesel" class="page"><div class="head"><h2>Diesel Tracking</h2><button class="btn" onclick="openModal('diesel')">+ Diesel Entry</button></div><div class="card"><div class="tableWrap"><table id="dieselTable"></table></div></div></section>
+    <section id="permits" class="page"><div class="head"><h2>SA / Cross-Border Permits</h2><button class="btn" onclick="openModal('permit')">+ Permit</button></div><div class="card"><div class="tableWrap"><table id="permitsTable"></table></div></div></section>
+    <section id="payroll" class="page"><div class="head"><h2>Payroll</h2><button class="btn" onclick="openModal('payroll')">+ Payroll</button></div><div class="card"><div class="tableWrap"><table id="payrollTable"></table></div></div></section>
+    <section id="workers" class="page"><div class="head"><h2>Site Workers</h2><button class="btn" onclick="openModal('worker')">+ Site Worker Day</button></div><div class="card"><div class="tableWrap"><table id="workersTable"></table></div></div></section>
+    <section id="maintenance" class="page"><div class="head"><h2>Maintenance Schedules</h2><button class="btn" onclick="openModal('maintenance')">+ Maintenance</button></div><div class="card"><div class="tableWrap"><table id="maintenanceTable"></table></div></div></section>
+    <section id="tyres" class="page"><div class="head"><h2>Tyre Tracking</h2><button class="btn" onclick="openModal('tyre')">+ Tyre Record</button></div><div class="card"><div class="tableWrap"><table id="tyresTable"></table></div></div></section>
+    <section id="workshop" class="page"><div class="head"><h2>Workshop Jobs</h2><button class="btn" onclick="openModal('workshop')">+ Workshop Job</button></div><div class="card"><div class="tableWrap"><table id="workshopTable"></table></div></div></section>
+    <section id="fines" class="page"><div class="head"><h2>Driver Fines / Damages</h2><button class="btn" onclick="openModal('fine')">+ Fine/Damage</button></div><div class="card"><div class="tableWrap"><table id="finesTable"></table></div></div></section>
+    <section id="border" class="page"><div class="head"><h2>Border Crossing Logs</h2><button class="btn" onclick="openModal('border')">+ Border Log</button></div><div class="card"><div class="tableWrap"><table id="borderTable"></table></div></div></section>
+
+    <section id="gps" class="page">
+      <div class="head"><h2>GPS Live Tracking</h2><button class="btn green" onclick="captureGPS()">📍 Send Current Location</button></div>
+      <div class="card"><p class="note">Driver presses this from phone. Office can open map link.</p><div class="tableWrap"><table id="gpsTable"></table></div></div>
+    </section>
+
+    <section id="invoices" class="page">
+      <div class="head"><h2>Invoice PDFs</h2><button class="btn" onclick="openModal('invoice')">+ Add Invoice</button></div>
+      <div class="card"><div class="tableWrap"><table id="invoicesTable"></table></div></div>
+    </section>
+
+    <section id="whatsapp" class="page">
+      <div class="head"><h2>WhatsApp Reports</h2><button class="btn green" onclick="makeWhatsApp()">Generate Report</button></div>
+      <div class="card"><textarea id="waText"></textarea><br><button class="btn green" onclick="openWhatsApp()">Open WhatsApp</button></div>
+    </section>
+
+    <section id="users" class="page">
+      <div class="head"><h2>Multi-Admin Permissions</h2><button class="btn" onclick="openModal('profile')">+ Add Profile</button></div>
+      <div class="card"><p class="note">This stores user roles. Actual email/password users must still be created in Supabase Authentication.</p><div class="tableWrap"><table id="profilesTable"></table></div></div>
+    </section>
+
+    <section id="settings" class="page">
+      <div class="head"><h2>Settings</h2></div>
+      <div class="card">
+        <button class="btn" onclick="loadAll()">Refresh from Supabase</button>
+        <button class="btn gray" onclick="exportBackup()">Download Backup JSON</button>
+        <button class="btn red" onclick="clearLocal()">Clear Saved URL/Key</button>
+        <p class="note">Install on Android: open this site in Chrome → 3 dots → Add to Home Screen.</p>
+      </div>
+    </section>
+  </main>
 </div>
 
-<div class="card">
-<h2>Quick Trip Entry</h2>
-<input id="route" placeholder="Route e.g. Windhoek to Cape Town">
-<input id="driver" placeholder="Driver">
-<input id="truck" placeholder="Truck">
-<input id="tripKm" type="number" placeholder="KM">
-<input id="rate" type="number" placeholder="Rate per KM">
-<input id="cost" type="number" placeholder="Total Costs">
-<button onclick="addTrip()">Save Trip to Supabase</button>
-</div>
-
-<div class="card">
-<h2>Trips</h2>
-<table id="tripsTable"></table>
-</div>
-
-<button onclick="logout()">Logout</button>
-</div>
+<div id="modal" class="modal"><div class="modalBox"><button class="close" onclick="closeModal()">×</button><h2 id="modalTitle"></h2><form id="modalForm"></form></div></div>
 
 <script>
-let sbClient = null;
-let trips = [];
+let sbClient=null, currentUser=null;
+let db={trips:[],fleet:[],drivers:[],diesel:[],permits:[],payroll:[],workers:[],maintenance:[],tyres:[],workshop:[],fines:[],border_logs:[],gps:[],invoices:[],profiles:[]};
 
-function cleanUrl(u){
-  return (u || '').trim().replace('/rest/v1/','').replace('/rest/v1','').replace(/\/$/,'');
-}
+const schemas={
+ trip:{table:'trips',fields:['route','driver','truck','km','rate','diesel_cost','tolls','permits_cost','food_money','border_cost','repairs','other_cost','status']},
+ fleet:{table:'fleet',fields:['truck_no','trailer_no','make_model','driver','status','current_km','next_service_km','license_expiry','roadworthy_expiry','insurance_expiry']},
+ driver:{table:'drivers',fields:['name','phone','license_expiry','pdp_expiry','passport_expiry','status']},
+ diesel:{table:'diesel',fields:['date','truck','driver','litres','amount','km','supplier','slip_no']},
+ permit:{table:'permits',fields:['item','owner','type','expiry_date','cost','status']},
+ payroll:{table:'payroll',fields:['date','employee','role','basic_salary','days_worked','overtime_hours','advance','deductions']},
+ worker:{table:'workers',fields:['date','name','site','role','status','hours','overtime','rate','advance']},
+ maintenance:{table:'maintenance',fields:['date','truck','issue','cost','next_service_km','status']},
+ tyre:{table:'tyres',fields:['date','truck','position','brand','serial_no','cost','km_fitted','status']},
+ workshop:{table:'workshop',fields:['date','truck','job_no','description','mechanic','parts_cost','labour_cost','status']},
+ fine:{table:'fines',fields:['date','driver','truck','type','description','amount','responsible_party','status']},
+ border:{table:'border_logs',fields:['date','truck','driver','border_post','direction','arrival_time','release_time','fees','delay_reason']},
+ invoice:{table:'invoices',fields:['date','client','invoice_no','route','amount','paid','status']},
+ profile:{table:'profiles',fields:['email','name','role','status']}
+};
 
-function money(n){
-  return 'N$ ' + Number(n||0).toLocaleString('en-NA',{minimumFractionDigits:2,maximumFractionDigits:2});
-}
-
-function message(t){
-  document.getElementById('msg').innerText = t;
-}
-
-function saveSettings(){
-  localStorage.setItem('sb_url', cleanUrl(document.getElementById('url').value));
-  localStorage.setItem('sb_key', document.getElementById('key').value.trim());
-  message('Saved. Now enter email/password and click Login.');
-}
-
+function cleanUrl(u){return (u||'').trim().replace('/rest/v1/','').replace('/rest/v1','').replace(/\/$/,'')}
+function money(n){return 'N$ '+Number(n||0).toLocaleString('en-NA',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function msg(t){document.getElementById('loginMsg').innerText=t}
+function saveSettings(){localStorage.setItem('sb_url',cleanUrl(document.getElementById('sbUrl').value));localStorage.setItem('sb_key',document.getElementById('sbKey').value.trim());msg('Saved.')}
 async function login(){
   try{
-    const url = cleanUrl(document.getElementById('url').value);
-    const key = document.getElementById('key').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-
-    if(!url || !key || !email || !password){
-      message('Fill in URL, key, email and password.');
-      return;
-    }
-
-    localStorage.setItem('sb_url', url);
-    localStorage.setItem('sb_key', key);
-
-    sbClient = window.supabase.createClient(url, key);
-
-    const result = await sbClient.auth.signInWithPassword({ email, password });
-    if(result.error){
-      message(result.error.message);
-      return;
-    }
-
-    document.getElementById('login').style.display='none';
-    document.getElementById('dashboard').style.display='block';
-    document.getElementById('welcome').innerText = 'Logged in as ' + email;
-
-    await loadTrips();
-  }catch(e){
-    message('Error: ' + e.message);
+    const url=cleanUrl(document.getElementById('sbUrl').value), key=document.getElementById('sbKey').value.trim(), email=document.getElementById('email').value.trim(), password=document.getElementById('password').value;
+    if(!url||!key||!email||!password){msg('Fill in all fields.');return}
+    localStorage.setItem('sb_url',url);localStorage.setItem('sb_key',key);
+    sbClient=window.supabase.createClient(url,key);
+    const res=await sbClient.auth.signInWithPassword({email,password});
+    if(res.error){msg(res.error.message);return}
+    currentUser=res.data.user;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    document.getElementById('loggedEmail').innerText=email;
+    await loadAll();
+  }catch(e){msg(e.message)}
+}
+async function logout(){if(sbClient) await sbClient.auth.signOut();location.reload()}
+function toggleMenu(){document.getElementById('sidebar').classList.toggle('open')}
+function showPage(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('sidebar').classList.remove('open');render()}
+async function loadAll(){
+  for(const t of Object.keys(db)){
+    const r=await sbClient.from(t).select('*').order('created_at',{ascending:false});
+    db[t]=r.error?[]:(r.data||[]);
   }
+  render(); makeWhatsApp(false);
 }
-
-async function addTrip(){
-  const km = Number(document.getElementById('tripKm').value || 0);
-  const rate = Number(document.getElementById('rate').value || 0);
-  const cost = Number(document.getElementById('cost').value || 0);
-  const income = km * rate;
-  const profit = income - cost;
-
-  const row = {
-    route: document.getElementById('route').value,
-    driver: document.getElementById('driver').value,
-    truck: document.getElementById('truck').value,
-    km: km, rate: rate, cost: cost, income: income, profit: profit
-  };
-
-  const result = await sbClient.from('trips').insert(row);
-  if(result.error){ alert(result.error.message); return; }
-
-  document.getElementById('route').value='';
-  document.getElementById('driver').value='';
-  document.getElementById('truck').value='';
-  document.getElementById('tripKm').value='';
-  document.getElementById('rate').value='';
-  document.getElementById('cost').value='';
-
-  await loadTrips();
+function tripCalc(t){
+  const income=Number(t.km||0)*Number(t.rate||0);
+  const cost=['diesel_cost','tolls','permits_cost','food_money','border_cost','repairs','other_cost'].reduce((a,k)=>a+Number(t[k]||0),0);
+  return {income,cost,profit:income-cost};
 }
-
-async function loadTrips(){
-  const result = await sbClient.from('trips').select('*').order('created_at',{ascending:false});
-  if(result.error){
-    message('Login OK. Create the trips table in Supabase SQL Editor. Error: ' + result.error.message);
-    trips = [];
-    render();
-    return;
-  }
-  trips = result.data || [];
-  render();
-}
-
+function rowLine(label,val){return `<div class="line"><span>${label}</span><b>${val}</b></div>`}
+function profitClass(n){return Number(n)>=0?'profit':'loss'}
 function render(){
-  const revenue = trips.reduce((a,t)=>a+Number(t.income||0),0);
-  const expenses = trips.reduce((a,t)=>a+Number(t.cost||0),0);
-  const profit = revenue - expenses;
-  const km = trips.reduce((a,t)=>a+Number(t.km||0),0);
-
-  document.getElementById('revenue').innerText = money(revenue);
-  document.getElementById('expenses').innerText = money(expenses);
-  document.getElementById('profit').innerText = money(profit);
-  document.getElementById('km').innerText = km.toLocaleString();
-
-  document.getElementById('tripsTable').innerHTML =
-    '<tr><th>Route</th><th>Driver</th><th>Truck</th><th>KM</th><th>Rate/KM</th><th>Income</th><th>Cost</th><th>Profit</th></tr>' +
-    trips.map(t=>'<tr><td>'+(t.route||'')+'</td><td>'+(t.driver||'')+'</td><td>'+(t.truck||'')+'</td><td>'+(t.km||0)+'</td><td>'+money(t.rate||0)+'</td><td>'+money(t.income||0)+'</td><td>'+money(t.cost||0)+'</td><td style="color:'+(Number(t.profit||0)>=0?'#49ff66':'#ff5555')+'">'+money(t.profit||0)+'</td></tr>').join('');
+  const totalRevenue=db.trips.reduce((a,t)=>a+tripCalc(t).income,0)+db.invoices.reduce((a,i)=>a+Number(i.paid||0),0);
+  const tripCosts=db.trips.reduce((a,t)=>a+tripCalc(t).cost,0);
+  const otherCosts=['diesel','payroll','workers','maintenance','tyres','workshop','fines'].reduce((a,t)=>a+db[t].reduce((x,r)=>x+Number(r.amount||r.cost||r.parts_cost||0)+Number(r.labour_cost||0)+Number(r.advance||0)+Number(r.deductions||0),0),0);
+  const totalCost=tripCosts+otherCosts;
+  const totalKm=db.trips.reduce((a,t)=>a+Number(t.km||0),0);
+  const dieselCost=db.diesel.reduce((a,d)=>a+Number(d.amount||0),0)+db.trips.reduce((a,t)=>a+Number(t.diesel_cost||0),0);
+  document.getElementById('mRevenue').innerText=money(totalRevenue);
+  document.getElementById('mExpenses').innerText=money(totalCost);
+  document.getElementById('mProfit').innerText=money(totalRevenue-totalCost);
+  document.getElementById('mKm').innerText=totalKm.toLocaleString();
+  document.getElementById('mDiesel').innerText=money(dieselCost);
+  table('recentTrips',db.trips.slice(0,6),['Route','Driver','Truck','KM','Rate/KM','Income','Cost','Profit'],t=>[t.route,t.driver,t.truck,t.km,money(t.rate),money(tripCalc(t).income),money(tripCalc(t).cost),`<span class="${profitClass(tripCalc(t).profit)}">${money(tripCalc(t).profit)}</span>`]);
+  table('tripsTable',db.trips,['Route','Driver','Truck','KM','Rate/KM','Diesel','Tolls','Food','Income','Cost','Profit','Status'],t=>[t.route,t.driver,t.truck,t.km,money(t.rate),money(t.diesel_cost),money(t.tolls),money(t.food_money),money(tripCalc(t).income),money(tripCalc(t).cost),`<span class="${profitClass(tripCalc(t).profit)}">${money(tripCalc(t).profit)}</span>`,t.status]);
+  table('fleetTable',db.fleet,['Truck','Trailer','Make','Driver','Status','Current KM','Next Service','License','Roadworthy','Insurance'],r=>[r.truck_no,r.trailer_no,r.make_model,r.driver,r.status,r.current_km,r.next_service_km,r.license_expiry,r.roadworthy_expiry,r.insurance_expiry]);
+  table('driversTable',db.drivers,['Name','Phone','License','PDP','Passport','Status'],r=>[r.name,r.phone,r.license_expiry,r.pdp_expiry,r.passport_expiry,r.status]);
+  table('dieselTable',db.diesel,['Date','Truck','Driver','Litres','Amount','KM','Supplier','Slip','KM/L'],r=>[r.date,r.truck,r.driver,r.litres,money(r.amount),r.km,r.supplier,r.slip_no,(Number(r.km||0)/Math.max(1,Number(r.litres||0))).toFixed(2)]);
+  table('permitsTable',db.permits,['Item','Owner','Type','Expiry','Cost','Status','Days Left'],r=>[r.item,r.owner,r.type,r.expiry_date,money(r.cost),r.status,daysLeft(r.expiry_date)]);
+  table('payrollTable',db.payroll,['Date','Employee','Role','Salary','Days','OT','Advance','Deductions','Net'],r=>[r.date,r.employee,r.role,money(r.basic_salary),r.days_worked,r.overtime_hours,money(r.advance),money(r.deductions),money(Number(r.basic_salary||0)+Number(r.overtime_hours||0)*50-Number(r.advance||0)-Number(r.deductions||0))]);
+  table('workersTable',db.workers,['Date','Name','Site','Role','Status','Hours','OT','Rate','Pay'],r=>[r.date,r.name,r.site,r.role,r.status,r.hours,r.overtime,money(r.rate),money((Number(r.hours||0)+Number(r.overtime||0)*1.5)*Number(r.rate||0)+Number(r.advance||0))]);
+  table('maintenanceTable',db.maintenance,['Date','Truck','Issue','Cost','Next KM','Status'],r=>[r.date,r.truck,r.issue,money(r.cost),r.next_service_km,r.status]);
+  table('tyresTable',db.tyres,['Date','Truck','Position','Brand','Serial','Cost','KM Fitted','Status'],r=>[r.date,r.truck,r.position,r.brand,r.serial_no,money(r.cost),r.km_fitted,r.status]);
+  table('workshopTable',db.workshop,['Date','Truck','Job','Description','Mechanic','Parts','Labour','Status'],r=>[r.date,r.truck,r.job_no,r.description,r.mechanic,money(r.parts_cost),money(r.labour_cost),r.status]);
+  table('finesTable',db.fines,['Date','Driver','Truck','Type','Description','Amount','Responsible','Status'],r=>[r.date,r.driver,r.truck,r.type,r.description,money(r.amount),r.responsible_party,r.status]);
+  table('borderTable',db.border_logs,['Date','Truck','Driver','Border','Direction','Arrival','Release','Fees','Delay'],r=>[r.date,r.truck,r.driver,r.border_post,r.direction,r.arrival_time,r.release_time,money(r.fees),r.delay_reason]);
+  table('gpsTable',db.gps,['Time','Email','Driver','Truck','Latitude','Longitude','Map'],r=>[r.created_at,r.email,r.driver,r.truck,r.lat,r.lng,`<a class="blueLink" target="_blank" href="https://maps.google.com/?q=${r.lat},${r.lng}">Open Map</a>`]);
+  table('invoicesTable',db.invoices,['Date','Client','Invoice','Route','Amount','Paid','Balance','Status','PDF'],(r,i)=>[r.date,r.client,r.invoice_no,r.route,money(r.amount),money(r.paid),money(Number(r.amount||0)-Number(r.paid||0)),r.status,`<button class="btn" onclick="invoicePDF(${i})">PDF</button>`]);
+  table('profilesTable',db.profiles,['Email','Name','Role','Status'],r=>[r.email,r.name,r.role,r.status]);
+  renderGroups();
+  renderAlerts();
 }
-
-async function logout(){
-  if(sbClient) await sbClient.auth.signOut();
-  location.reload();
+function table(id,rows,heads,map){const el=document.getElementById(id);if(!el)return;el.innerHTML='<thead><tr>'+heads.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+rows.map((r,i)=>'<tr>'+map(r,i).map(c=>`<td>${c??''}</td>`).join('')+'</tr>').join('')+'</tbody>'}
+function renderGroups(){
+  function groupBy(key){const g={};db.trips.forEach(t=>{const k=t[key]||'Unknown';g[k]=(g[k]||0)+tripCalc(t).profit});return Object.entries(g).map(([k,v])=>rowLine(k,`<span class="${profitClass(v)}">${money(v)}</span>`)).join('')}
+  document.getElementById('profitDriver').innerHTML=groupBy('driver');
+  document.getElementById('profitTruck').innerHTML=groupBy('truck');
+  document.getElementById('profitRoute').innerHTML=groupBy('route');
 }
-
-window.onload = function(){
-  const url = localStorage.getItem('sb_url');
-  const key = localStorage.getItem('sb_key');
-  if(url) document.getElementById('url').value = url;
-  if(key) document.getElementById('key').value = key;
+function daysLeft(d){if(!d)return '';return Math.ceil((new Date(d)-new Date())/86400000)}
+function renderAlerts(){
+  const alerts=[];
+  db.permits.forEach(p=>{if(daysLeft(p.expiry_date)<45)alerts.push(`${p.item} ${p.owner} expires in ${daysLeft(p.expiry_date)} days`)});
+  db.fleet.forEach(f=>{if(daysLeft(f.license_expiry)<45)alerts.push(`${f.truck_no} license expires in ${daysLeft(f.license_expiry)} days`); if(Number(f.next_service_km||0)-Number(f.current_km||0)<5000)alerts.push(`${f.truck_no} service due soon`)});
+  document.getElementById('alerts').innerHTML=alerts.length?alerts.map(a=>`<p>⚠️ ${a}</p>`).join(''):'<p>No urgent alerts</p>';
 }
+function openModal(type){
+  const s=schemas[type]; const form=document.getElementById('modalForm'); document.getElementById('modalTitle').innerText='Add '+type.toUpperCase(); document.getElementById('modal').classList.add('show');
+  form.innerHTML='<div class="formGrid">'+s.fields.map(f=>`<label>${f}<input name="${f}" ${f.includes('date')||f.includes('expiry')?'type="date"':''} placeholder="${f}"></label>`).join('')+'</div><br><button class="btn" type="submit">Save</button>';
+  form.onsubmit=async(e)=>{e.preventDefault();let obj={};s.fields.forEach(f=>obj[f]=form.elements[f].value);const r=await sbClient.from(s.table).insert(obj);if(r.error){alert(r.error.message);return}closeModal();await loadAll();}
+}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+async function captureGPS(){
+  if(!navigator.geolocation){alert('GPS not supported');return}
+  navigator.geolocation.getCurrentPosition(async(pos)=>{
+    const obj={email:currentUser?.email||'',driver:currentUser?.email||'',truck:'',lat:pos.coords.latitude,lng:pos.coords.longitude};
+    const r=await sbClient.from('gps').insert(obj); if(r.error) alert(r.error.message); else await loadAll();
+  },err=>alert(err.message),{enableHighAccuracy:true});
+}
+function makeWhatsApp(show=true){
+  const rev=db.trips.reduce((a,t)=>a+tripCalc(t).income,0), cost=db.trips.reduce((a,t)=>a+tripCalc(t).cost,0), profit=rev-cost;
+  const txt=`ANGERMUND TRANSPORT DAILY REPORT\nDate: ${new Date().toLocaleDateString()}\nTrips: ${db.trips.length}\nRevenue: ${money(rev)}\nCost: ${money(cost)}\nProfit: ${money(profit)}\nKM: ${db.trips.reduce((a,t)=>a+Number(t.km||0),0).toLocaleString()}`;
+  const box=document.getElementById('waText'); if(box)box.value=txt;
+}
+function openWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent(document.getElementById('waText').value),'_blank')}
+function invoicePDF(i){const inv=db.invoices[i];const html=`<html><body style="font-family:Arial;padding:30px"><h1>ANGERMUND TRANSPORT</h1><h2>Invoice ${inv.invoice_no}</h2><p>Client: ${inv.client}</p><p>Route: ${inv.route}</p><h2>Amount: ${money(inv.amount)}</h2><p>Paid: ${money(inv.paid)}</p><p>Balance: ${money(Number(inv.amount||0)-Number(inv.paid||0))}</p><script>window.print()</script></body></html>`;let w=window.open('','_blank');w.document.write(html);w.document.close()}
+function exportBackup(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));a.download='angermund-erp-backup.json';a.click()}
+function clearLocal(){localStorage.removeItem('sb_url');localStorage.removeItem('sb_key');location.reload()}
+window.onload=()=>{const u=localStorage.getItem('sb_url'),k=localStorage.getItem('sb_key');if(u)document.getElementById('sbUrl').value=u;if(k)document.getElementById('sbKey').value=k}
 </script>
 </body>
 </html>
