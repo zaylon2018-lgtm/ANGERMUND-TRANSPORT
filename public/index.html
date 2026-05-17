@@ -1,118 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Angermund Transport ERP</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#07101d">
-<link rel="stylesheet" href="styles.css">
+<style>
+body{margin:0;font-family:Arial;background:#08111d;color:#fff;background-image:linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)),url('truck-bg.jpg');background-size:cover}
+.login{max-width:400px;margin:80px auto;background:#111;padding:25px;border-radius:15px}
+input,button{width:100%;padding:12px;margin-top:10px;border-radius:8px;border:0}
+button{background:#1877f2;color:#fff;font-weight:bold}
+.dashboard{display:none;padding:20px}
+.card{background:rgba(20,20,20,.8);padding:20px;border-radius:14px;margin-bottom:15px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<div id="loginScreen" class="loginScreen">
-  <div class="loginCard">
-    <h1>ANGERMUND <span>TRANSPORT</span></h1>
-    <p>Full cloud ERP • Netlify backend • drivers • fleet • invoices • GPS</p>
-    <input id="loginUser" placeholder="Username" value="admin">
-    <input id="loginPass" placeholder="Password" type="password" value="admin123">
-    <button onclick="login()">Login</button>
-    <small>Demo admin: admin / admin123</small>
-  </div>
+<div class="login" id="login">
+<h1>ANGERMUND TRANSPORT</h1>
+<p>Supabase ERP Login</p>
+<input id="url" placeholder="Supabase URL">
+<input id="key" placeholder="Supabase Anon Key">
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
 </div>
 
-<div id="app" class="app hidden">
-  <div class="mobileTop"><button onclick="toggleMenu()">☰</button><b>ANGERMUND TRANSPORT</b><button onclick="logout()">Logout</button></div>
-  <aside id="sidebar">
-    <div class="brand"><div class="truckIcon">🚛</div><div><h1>ANGERMUND</h1><h2>TRANSPORT</h2></div></div>
-    <button class="nav active" onclick="showPage('dashboard',this)">🏠 Dashboard</button>
-    <button class="nav" onclick="showPage('trips',this)">🚚 Trips</button>
-    <button class="nav" onclick="showPage('fleet',this)">🚛 Fleet / Trucks</button>
-    <button class="nav" onclick="showPage('drivers',this)">👤 Drivers</button>
-    <button class="nav" onclick="showPage('fuel',this)">⛽ Fuel / Diesel</button>
-    <button class="nav" onclick="showPage('expenses',this)">🧾 Expenses</button>
-    <button class="nav" onclick="showPage('maintenance',this)">🔧 Maintenance</button>
-    <button class="nav" onclick="showPage('permits',this)">🛡️ Permits</button>
-    <button class="nav" onclick="showPage('invoices',this)">📄 Invoices</button>
-    <button class="nav" onclick="showPage('workers',this)">👷 Site Workers</button>
-    <button class="nav" onclick="showPage('tracking',this)">📍 Live Tracking</button>
-    <button class="nav" onclick="showPage('whatsapp',this)">💬 WhatsApp Reports</button>
-    <button class="nav" onclick="showPage('users',this)">🔐 Users / Permissions</button>
-    <button class="nav" onclick="showPage('reports',this)">📊 Reports</button>
-    <button class="nav" onclick="showPage('settings',this)">⚙️ Settings</button>
-    <div class="adminBox"><b id="loggedUser">Admin</b><br><span id="loggedRole">● Online</span><br><button onclick="logout()">Logout</button></div>
-  </aside>
-
-  <main>
-    <header class="topbar">
-      <button onclick="toggleMenu()">☰</button>
-      <div class="dateBox">📅 <input type="date" id="dateInput"></div>
-      <button onclick="saveAll()">💾 Save Cloud</button>
-      <button onclick="loadAll()">🔄 Refresh</button>
-      <button onclick="logout()">Logout</button>
-    </header>
-
-    <section id="dashboard" class="page active">
-      <div id="metrics" class="metrics"></div>
-      <div class="dashboardGrid">
-        <div class="card quick">
-          <h3>QUICK ACTIONS</h3>
-          <div class="quickBtns">
-            <button class="blue" onclick="openModal('trip')">🚚<b>NEW TRIP</b></button>
-            <button class="green" onclick="openModal('fuel')">⛽<b>FUEL ENTRY</b></button>
-            <button class="orange" onclick="openModal('expense')">🔧<b>EXPENSE</b></button>
-            <button class="purple" onclick="openModal('driver')">👤<b>DRIVER</b></button>
-            <button class="teal" onclick="openModal('truck')">🚛<b>ADD TRUCK</b></button>
-            <button class="blue2" onclick="openModal('invoice')">📄<b>INVOICE</b></button>
-          </div>
-        </div>
-        <div></div>
-        <div class="rightStack">
-          <div class="card"><h3>TRIPS OVERVIEW</h3><div class="donut"><span id="tripCount">0<br><small>Trips</small></span></div><p>🟢 Completed &nbsp; 🟠 In Progress &nbsp; ⚪ Planned</p></div>
-          <div class="card"><h3>ALERTS</h3><div id="alerts"></div></div>
-        </div>
-      </div>
-      <div class="bottomGrid">
-        <div class="card wide"><h3>RECENT TRIPS</h3><div class="tableWrap"><table id="recentTrips"></table></div></div>
-        <div class="card"><h3>PROFIT / LOSS SUMMARY</h3><div class="switch"><button onclick="profitMode='driver';render()">By Driver</button><button onclick="profitMode='truck';render()">By Truck</button><button onclick="profitMode='route';render()">By Route</button></div><div id="profitSummary"></div></div>
-        <div class="card"><h3>TOP EXPENSES</h3><div id="topExpenses"></div></div>
-        <div class="card"><h3>FUEL CONSUMPTION</h3><div class="gauge"><b id="fuelGauge">0.00</b><small>KM/L</small></div></div>
-        <div class="card"><h3>SITE WORKERS TODAY</h3><div class="workerStats"><div><b id="present">0</b><span>Present</span></div><div><b id="absent">0</b><span>Absent</span></div><div><b id="leave">0</b><span>On Leave</span></div></div></div>
-      </div>
-    </section>
-
-    <section id="trips" class="page"><div class="head"><h2>Trips / Rate per KM</h2><button onclick="openModal('trip')">+ New Trip</button></div><div class="card"><table id="tripsTable"></table></div></section>
-    <section id="fleet" class="page"><div class="head"><h2>Editable Fleet / Trucks</h2><button onclick="openModal('truck')">+ Add Truck</button></div><div class="card"><table id="fleetTable"></table></div></section>
-    <section id="drivers" class="page"><div class="head"><h2>Drivers</h2><button onclick="openModal('driver')">+ Add Driver</button></div><div class="card"><table id="driversTable"></table></div></section>
-    <section id="fuel" class="page"><div class="head"><h2>Fuel / Diesel</h2><button onclick="openModal('fuel')">+ Fuel Entry</button></div><div class="card"><table id="fuelTable"></table></div></section>
-    <section id="expenses" class="page"><div class="head"><h2>Expenses</h2><button onclick="openModal('expense')">+ Expense</button></div><div class="card"><table id="expensesTable"></table></div></section>
-    <section id="maintenance" class="page"><div class="head"><h2>Maintenance</h2><button onclick="openModal('maintenance')">+ Maintenance</button></div><div class="card"><table id="maintenanceTable"></table></div></section>
-    <section id="permits" class="page"><div class="head"><h2>Permits / Compliance</h2><button onclick="openModal('permit')">+ Permit</button></div><div class="card"><table id="permitsTable"></table></div></section>
-    <section id="invoices" class="page"><div class="head"><h2>Invoices</h2><button onclick="openModal('invoice')">+ Invoice</button></div><div class="card"><table id="invoicesTable"></table></div></section>
-    <section id="workers" class="page"><div class="head"><h2>Site Workers</h2><button onclick="openModal('worker')">+ Worker Day</button></div><div class="card"><table id="workersTable"></table></div></section>
-
-    <section id="tracking" class="page">
-      <div class="head"><h2>Live Driver Tracking</h2><button onclick="captureLocation()">📍 Send My Location</button></div>
-      <div class="card"><p>Drivers can press “Send My Location” from their phone. The office will see latest GPS coordinates below.</p><table id="trackingTable"></table></div>
-    </section>
-
-    <section id="whatsapp" class="page">
-      <div class="head"><h2>WhatsApp Reports</h2><button onclick="buildWhatsAppReport()">Generate WhatsApp Report</button></div>
-      <div class="card"><textarea id="waText" rows="12"></textarea><br><button onclick="openWhatsApp()">Open WhatsApp</button></div>
-    </section>
-
-    <section id="users" class="page">
-      <div class="head"><h2>Users / Permissions</h2><button onclick="openModal('user')">+ Add User</button></div>
-      <div class="card"><p>Roles: admin = full control, manager = operations, driver = trip/GPS only.</p><table id="usersTable"></table></div>
-    </section>
-
-    <section id="reports" class="page"><div class="head"><h2>Reports</h2><button onclick="exportData()">Download Backup</button></div><div class="card report" id="reportsBox"></div></section>
-    <section id="settings" class="page"><div class="head"><h2>Settings</h2></div><div class="card settings"><button onclick="saveAll()">Save to Cloud Database</button><button onclick="loadAll()">Load from Cloud Database</button><button onclick="exportData()">Download Backup JSON</button><input type="file" onchange="importData(event)"><button class="danger" onclick="resetData()">Reset Demo Data</button><p>Backend included: Netlify Functions + Netlify Blobs. For deployment, use GitHub/Netlify build, not Netlify Drop.</p></div></section>
-  </main>
+<div class="dashboard" id="dashboard">
+<h1>Transport ERP Dashboard</h1>
+<div class="card">
+<h2>Trips</h2>
+<p>Track all SA trips, KM, fuel, permits and profit.</p>
+</div>
+<div class="card">
+<h2>Fleet</h2>
+<p>Editable truck and trailer management.</p>
+</div>
+<div class="card">
+<h2>GPS & WhatsApp</h2>
+<p>Ready for future integration.</p>
+</div>
+<button onclick="logout()">Logout</button>
 </div>
 
-<div id="modal" class="modal"><div class="modalBox"><button class="close" onclick="closeModal()">×</button><h2 id="modalTitle"></h2><form id="modalForm"></form></div></div>
-<div id="toast"></div>
-<script src="app.js"></script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>
+<script>
+let supabase;
+
+async function login(){
+  const url=document.getElementById('url').value;
+  const key=document.getElementById('key').value;
+  const email=document.getElementById('email').value;
+  const password=document.getElementById('password').value;
+
+  localStorage.setItem('sb_url',url);
+  localStorage.setItem('sb_key',key);
+
+  supabase = window.supabase.createClient(url,key);
+
+  const {data,error}=await supabase.auth.signInWithPassword({
+    email,password
+  });
+
+  if(error){alert(error.message);return;}
+
+  document.getElementById('login').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+}
+
+function logout(){
+ localStorage.clear();
+ location.reload();
+}
+
+window.onload=()=>{
+ const url=localStorage.getItem('sb_url');
+ const key=localStorage.getItem('sb_key');
+ if(url) document.getElementById('url').value=url;
+ if(key) document.getElementById('key').value=key;
+}
+</script>
 </body>
 </html>

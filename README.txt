@@ -1,44 +1,35 @@
-ANGERMUND TRANSPORT FULL BACKEND NETLIFY SITE
+DEPLOY GUIDE
 
-IMPORTANT:
-This backend version cannot be uploaded through simple Netlify Drop only.
-Use GitHub import or Netlify CLI, because it includes Netlify Functions.
+1. Create Supabase account:
+https://supabase.com
 
-WHAT IS INCLUDED:
-- Login system
-- Cloud database using Netlify Blobs
-- Multi-user roles: admin, manager, driver
-- Admin users page
-- Editable fleet/trucks
-- Trips with rate per KM and profit/loss
-- Profit/loss by driver, truck, route
-- Fuel, expenses, permits, invoices, workers
-- GPS location capture from driver phone
-- WhatsApp report generator
-- Invoice print/PDF screen
-- PWA install to Android home screen
+2. Create new project
 
-DEMO LOGIN:
-admin / admin123
-driver1 / driver123
+3. In Supabase:
+- Authentication -> Users
+- Add user manually
 
-DEPLOY WITH GITHUB:
-1. Upload this whole folder to GitHub.
-2. Netlify > Add new site > Import from Git.
-3. Select the repo.
-4. Build command: npm install
-5. Publish directory: public
-6. Functions directory: netlify/functions
-7. Add environment variable:
-   JWT_SECRET = any long private random text
-8. Deploy.
+4. Copy:
+- Project URL
+- anon public key
 
-LOCAL TEST:
-1. Install Node.js
-2. npm install
-3. npx netlify dev
+5. Upload this folder to GitHub
 
-NOTES:
-- WhatsApp uses click-to-send link. Real automated WhatsApp messages need WhatsApp Business Cloud API.
-- GPS captures driver phone location when driver presses the location button. Continuous live tracking needs a mobile background app.
-- Invoice PDF uses browser print/save as PDF.
+6. Go to Netlify:
+https://app.netlify.com
+
+7. Add new site -> Import from GitHub
+
+8. Publish directory:
+public
+
+9. Build command:
+leave empty
+
+10. Deploy
+
+11. Open live Netlify URL
+
+12. Paste Supabase URL + anon key into login page
+
+13. Login with your Supabase user
